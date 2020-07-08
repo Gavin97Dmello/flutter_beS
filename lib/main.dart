@@ -54,8 +54,10 @@ List<dynamic> _feedList =[];
         body: ListView.builder(
           itemCount:_feedList.length,
           itemBuilder: (BuildContext context, int index) {
-            // print(_feedList[index]);
-            return FeedCard(_feedList[index]['title'],_feedList[index]['description'],_feedList[index]['interested_count'] , index);
+            // print(_feedList[index]['title']);
+                        return FeedCard(_feedList[index]);
+
+            // return FeedCard(_feedList[index]['title'],_feedList[index]['description'],_feedList[index]['interested_count'] , index);
           })
       )
     );
