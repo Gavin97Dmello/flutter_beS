@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import './components/FeedCard.dart';
 import './services/ApiProvider.dart';
+import 'package:getwidget/getwidget.dart';
+
 import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
@@ -29,8 +31,13 @@ List<dynamic> _feedList =[];
 
   void _getFeeds() async {
     ApiProvider _provider = ApiProvider();
-    _provider.getFeeds({'offset':_offset.toString(), 'limit': '10'}).then((response) {
-                // print('response'); 
+    _provider.getFeeds({'offset':_offset.toString(), 'limit': '10', "feed": true.toString() ,
+      "interested": false.toString(),
+      "in_progress": false.toString(),
+      "done": false.toString(),
+      "can_guide": false.toString(),
+      "created": false.toString(),}).then((response) {
+                // print(response); 
 
           // print(response['results']); 
           setState(() {
@@ -51,7 +58,7 @@ List<dynamic> _feedList =[];
         appBar: AppBar(
           title: Text('beSomeone'),
         ),
-        body: ListView.builder(
+        body: _feedList.length ==0?GFLoader():ListView.builder(
           itemCount:_feedList.length,
           itemBuilder: (BuildContext context, int index) {
             // print(_feedList[index]['title']);
