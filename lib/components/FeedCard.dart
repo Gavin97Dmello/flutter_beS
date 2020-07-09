@@ -2,6 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_parsed_text/flutter_parsed_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:getwidget/getwidget.dart';
+import 'package:beSomeone/services/RouteGenerator.dart';
+import 'package:beSomeone/main.dart';
+
+
+
 // import 'package:carousel_pro/carousel_pro.dart';
 
 // import 'package:url_launcher/url_launcher.dart';
@@ -11,16 +17,16 @@ import 'package:carousel_slider/carousel_slider.dart';
 
 class FeedCard extends StatefulWidget {
   Map<String, dynamic> item;
-  String title, description;
-  int interestedCount;
+ 
   int index;
-  FeedCard(this.item);
+  Function callback;
+  FeedCard(this.item, this.callback);
 
   // FeedCard(this.title, this.description, this.interestedCount, this.index);
 
   @override
   FeedCardState createState() {
-    return FeedCardState(item: this.item);
+    return FeedCardState(item: this.item, callBack: this.callback);
 
     // return FeedCardState(title: this.title, description: this.description, interestedCount: this.interestedCount);
   }
@@ -30,9 +36,10 @@ class FeedCardState extends State<FeedCard> {
   Map<String, dynamic> item;
   String title, description;
   int interestedCount;
-    int _current = 0;
+  int _current = 0;
+  Function callBack;
 
-  FeedCardState({this.item});
+  FeedCardState({this.item, this.callBack});
 
   @override
   void initState() {}
@@ -43,7 +50,9 @@ class FeedCardState extends State<FeedCard> {
     });
   }
 
-  _handleComments() {}
+  _handleComments() {
+    callBack(item['id']);
+  }
   _handleShare() {}
 
   // FeedCardState({this.title, this.description, this.interestedCount});
@@ -51,26 +60,27 @@ class FeedCardState extends State<FeedCard> {
   Widget build(BuildContext context) {
     // var decodedTitle = jsonDecode(item)['title'];
     // print(item["title"]);
-    
+
     var imageList = item['images_details'] as List;
-  final List<String> imageArray = [
-  
-];
-  if(imageList != null && imageList.length > 0)
-    for(var i=0; i< imageList.length; i++) {
-      imageArray.add(imageList[i]["path"]);
+    var subjectList = item["subject_details"] as List;
+    final List<String> imageArray = [];
+    if (imageList != null && imageList.length > 0) {
+      for (var i = 0; i < imageList.length; i++) {
+        imageArray.add(imageList[i]["path"]);
+      }
     }
- double width = MediaQuery.of(context).size.width;
+    if (imageArray.length == 0 &&
+        subjectList != null &&
+        subjectList.length > 0) {
+      imageArray.add(imageList[0]["path"]);
+    }
 
-double yourWidth = width-100;
-double yourHeight = (width-100)*2/3;
-        
-  // if(imageList != null && imageList.length > 0){
+    double width = MediaQuery.of(context).size.width;
 
-        print(imageArray);
-  // }
-// 
+    double yourWidth = width;
+    double yourHeight = (width) * 2 / 3;
 
+    print(imageArray);
 
     return (Container(
         width: double.infinity,
@@ -87,64 +97,61 @@ double yourHeight = (width-100)*2/3;
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(0),
-
-                // boxShadow: [BoxShadow(blurRadius: 5, color: Colors.grey)],
               ),
               child: Column(children: [
-                ////
-        //         SizedBox(
-        //   height: 150.0,
-        //   width: 300.0,
-        //   child: Carousel(
-        //     boxFit: BoxFit.cover,
-        //     autoplay: false,
-            
-
-        //     showIndicator: true,
-        //     indicatorBgPadding: 7.0,
-        //     images: imageArray,
-        //   ),
-        // ),
-               
-  CarouselSlider(
-            items: imageArray.map((item) => Container(
-            child: 
-               Image.network(item,  fit: BoxFit.cover),
-            
-            color: Colors.white,
-          )).toList(),
-            options: CarouselOptions(
-              height: yourHeight,
-              // autoPlay: true,
-              enlargeCenterPage: true,
-          aspectRatio: 2.5,
-              onPageChanged: (index, reason) {
-                setState(() {
-                  _current = index;
-                });
-              }
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: imageArray.map((url) {
-              int index = imageArray.indexOf(url);
-              return Container(
-                width: 8.0,
-                height: 8.0,
-                margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _current == index
-                    ? Color.fromRGBO(6, 102, 169, 1)
-                    : Color.fromRGBO(0, 0, 0, 0.4),
-                ),
-              );
-            }).toList(),
-          ),
+                imageArray.length > 1
+                    ? CarouselSlider(
+                        items: imageArray
+                            .map((item) => Container(
+                                  child: GFImageOverlay(
+                                      height: yourHeight,
+                                      width: yourWidth,
+                                      image: NetworkImage(item)),
+                                  color: Colors.white,
+                                ))
+                            .toList(),
+                        options: CarouselOptions(
+                           height: yourHeight,
+              viewportFraction: 1.0,
+              enlargeCenterPage: false,
+                            onPageChanged: (index, reason) {
+                              setState(() {
+                                _current = index;
+                              });
+                            }),
+                      )
+                    // Image.asset('assets/images/noImage.png',  width: 400, height: 200)
+                    : GFImageOverlay(
+                        height: yourHeight,
+                        width: yourWidth,
+                        image: AssetImage('assets/images/noImage.png')),
+                imageArray.length > 1
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: imageArray.map((url) {
+                          int index = imageArray.indexOf(url);
+                          return Container(
+                            width: 8.0,
+                            height: 8.0,
+                            margin: EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 2.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _current == index
+                                  ? Color.fromRGBO(6, 102, 169, 1)
+                                  : Color.fromRGBO(0, 0, 0, 0.4),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                    : Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.only(top: 10),
+                      ),
                 ////
                 Container(
                     width: double.infinity,
+                    margin: EdgeInsets.only(top: 10),
                     child: Text(
                       item['title'],
                       textAlign: TextAlign.left,

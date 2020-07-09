@@ -24,6 +24,16 @@ class ApiProvider {
 
   }
 
+  Future<dynamic> getAdventure( String id) async {
+    var responseJson;
+    final uri = Uri.http(_baseUrl, '/api/v1/adventures/${id}',);
+      final response = await http.get(uri, 
+      headers: _headers );
+      responseJson = _response(response);
+    return responseJson;
+
+  }
+
   dynamic _response(http.Response response) {
     switch (response.statusCode) {
       case 200:
